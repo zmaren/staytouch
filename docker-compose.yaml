@@ -1,0 +1,57 @@
+version: '3'
+
+services:
+  lb:
+    image: haproxy
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./haproxy:/usr/local/etc/haproxy
+  staytouch1:
+    env_file:
+      - ./app/.env
+    image: staytouch
+    environment:
+      - APP_ID=1111
+      - HASURA_URL=${HASURA_URL}
+  staytouch2:
+    env_file:
+      - ./app/.env
+    image: staytouch
+    environment:
+      - APP_ID=2222
+      - HASURA_URL=${HASURA_URL}
+  staytouch3:
+    env_file:
+      - ./app/.env
+    image: staytouch
+    environment:
+      - APP_ID=3333
+      - HASURA_URL=${HASURA_URL}
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+  hasura:
+    image: hasura/graphql-engine:v2.19.0.cli-migrations-v3
+    restart: always
+    volumes:
+      - ./app/hasura/migrations:/hasura-migrations
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgres@postgres:5432/postgres
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+      HASURA_GRAPHQL_DEV_MODE: "true"
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
+      HASURA_GRAPHQL_ADMIN_SECRET: ${HASURA_ADMIN_SECRET}
+      HASURA_GRAPHQL_JWT_SECRET: '{"type": "HS256","key": "${JWT_SECRET}", "${CLAIMS_PATH}": "$$"}'
