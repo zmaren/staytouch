@@ -1,3 +1,11 @@
+### What's done
+* RESTful API
+* Auth, filtering users, getting all users
+### What's not done
+* Due to local issues I had, I didn't use actions with handler. Instead, I used database function.
+* For location filtering, we do not have computed field "location"
+* Pagination
+
 ## Setup
 
 ### Set environment variables
